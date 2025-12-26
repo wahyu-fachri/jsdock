@@ -1,0 +1,29 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ] # Jalan otomatis saat push ke branch main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            # Pindah ke folder project (asumsi folder sudah ada)
+            git clone https://github.com/wahyu-fachri/jsdock.git 
+            cd ~/jsdock
+            
+            # Ambil update kode terbaru
+            git pull origin main
+            
+            # Restart kontainer dengan kode baru
+            docker-compose up -d --build
